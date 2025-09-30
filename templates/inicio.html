@@ -7,16 +7,20 @@
   <title>Bufete de Abogados - Justicia y Confianza</title>
 </head>
 
-
 <body>
   <header>
     <h1>Bufete de Abogados "Justicia y Confianza"</h1>
     <nav>
       <a href="#inicio">Inicio</a> |
-      <a href="#mision">Mision</a> |
-      <a href="#vision">Vision </a> |
+      <a href="#mision">Misión</a> |
+      <a href="#vision">Visión</a> |
       <a href="#servicios">Servicios</a> |
       <a href="#contacto">Contacto</a>
+
+      {% if rol == "admin" %}
+        | <a href="{{ url_for('admin_panel') }}">Panel de Admin</a>
+      {% endif %}
+      | <a href="{{ url_for('logout') }}">Cerrar sesión</a>
     </nav>
   </header>
 
@@ -26,10 +30,10 @@
       Somos un bufete de abogados comprometido con la justicia y la defensa de los derechos
       de nuestros clientes. Más de 20 años de experiencia nos respaldan.
     </p>
-    <img src="{{ url_for('static', filename='abogados.png') }}" alt="Equipo de abogados" width="400">
+
+    <img src="https://antonio57093.github.io/Programacion_web/static/abogados.png" alt="Equipo de abogados" width="400">
   </section>
 
-  
   <section id="mision">
     <h2>Nuestra Misión</h2>
     <p>
@@ -48,7 +52,7 @@
 
   <section id="servicios">
     <h2>Servicios Legales</h2>
-     <ul>
+    <ul>
     {% if servicios %}
         {% for servicio in servicios %}
             <li>{{ servicio.nombre }} - ${{ servicio.costo }}</li>
@@ -77,7 +81,18 @@
 
   <footer>
     <p>Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados</p>
+  
+    <a href="https://validator.w3.org/check?uri=referer">
+      <img src="https://www.w3.org/Icons/valid-html401"
+           alt="¡HTML válido!" height="31" width="88">
+    </a>
+
+    <a href="https://jigsaw.w3.org/css-validator/check/referer">
+      <img src="https://jigsaw.w3.org/css-validator/images/vcss-blue"
+            alt="¡CSS Válido!" height="31" width="88" />
+    </a>
   </footer>
 </body>
 </html>
+
 
