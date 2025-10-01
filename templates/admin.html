@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Panel de Administración</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+  <link rel="stylesheet" href="https://antonio57093.github.io/Programacion_web/static/admin.css">
 </head>
 <body>
+    
   <header>
     <h1>Panel de Administración - Servicios</h1>
     <nav>
@@ -32,22 +33,37 @@
       </form>
     </section>
 
-    <!-- Eliminar servicio -->
+    <!-- Editar servicio -->
     <section>
-      <h2>Eliminar un servicio</h2>
-      <form method="POST" action="{{ url_for('eliminar_servicio') }}">
-        <label for="id">Selecciona el servicio:</label>
-        <select id="id" name="id" required>
+      <h2>Editar un servicio</h2>
+      <form method="POST" action="{{ url_for('actualizar_servicio') }}">
+        <label for="id_editar">Selecciona el servicio:</label>
+        <select id="id_editar" name="id" required onchange="cargarDatos(this)">
+          <option value="">-- Selecciona --</option>
           {% for servicio in servicios %}
-            <option value="{{ servicio.id }}">{{ servicio.nombre }} - ${{ servicio.costo }}</option>
+            <option value="{{ servicio.id }}"
+              data-nombre="{{ servicio.nombre }}"
+              data-descripcion="{{ servicio.descripcion }}"
+              data-costo="{{ servicio.costo }}">
+              {{ servicio.nombre }} - ${{ servicio.costo }}
+            </option>
           {% endfor %}
         </select><br><br>
 
-        <button type="submit">Eliminar Servicio</button>
+        <label for="nombre_editar">Nombre:</label>
+        <input type="text" id="nombre_editar" name="nombre" required><br><br>
+
+        <label for="descripcion_editar">Descripción:</label>
+        <textarea id="descripcion_editar" name="descripcion" rows="3" required></textarea><br><br>
+
+        <label for="costo_editar">Costo:</label>
+        <input type="number" id="costo_editar" name="costo" required><br><br>
+
+        <button type="submit">Actualizar Servicio</button>
       </form>
     </section>
 
-    <!-- Lista de servicios -->
+
     <section>
       <h2>Servicios Actuales</h2>
       <table>
@@ -56,6 +72,7 @@
           <th>Nombre</th>
           <th>Descripción</th>
           <th>Costo</th>
+          <th>Acciones</th>
         </tr>
         {% for servicio in servicios %}
         <tr>
@@ -63,6 +80,13 @@
           <td>{{ servicio.nombre }}</td>
           <td>{{ servicio.descripcion }}</td>
           <td>${{ servicio.costo }}</td>
+          <td>
+            <!-- Botón eliminar -->
+            <form method="POST" action="{{ url_for('eliminar_servicio') }}" style="display:inline;">
+              <input type="hidden" name="id" value="{{ servicio.id }}">
+              <button type="submit" onclick="return confirm('¿Seguro que quieres eliminar este servicio?')">Eliminar</button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </table>
@@ -70,7 +94,35 @@
   </main>
 
   <footer>
-    <p>Bufete de Abogados "Justicia y Confianza" © 2025</p>
+    <p>Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados</p>
+  
+    <a href="https://validator.w3.org/check?uri=referer">
+      <img src="https://www.w3.org/Icons/valid-html401"
+           alt="¡HTML válido!" height="31" width="88">
+    </a>
+
+    <a href="https://jigsaw.w3.org/css-validator/check/referer">
+      <img src="https://jigsaw.w3.org/css-validator/images/vcss-blue"
+            alt="¡CSS Válido!" height="31" width="88" />
+    </a>
   </footer>
+
+  <!-- Script para cargar datos en el formulario de edicion -->
+  <script>
+    function cargarDatos(select) {
+      let option = select.options[select.selectedIndex];
+      if(option.value) {
+        document.getElementById("nombre_editar").value = option.getAttribute("data-nombre");
+        document.getElementById("descripcion_editar").value = option.getAttribute("data-descripcion");
+        document.getElementById("costo_editar").value = option.getAttribute("data-costo");
+      } else {
+        document.getElementById("nombre_editar").value = "";
+        document.getElementById("descripcion_editar").value = "";
+        document.getElementById("costo_editar").value = "";
+      }
+    }
+  </script>
 </body>
 </html>
+
+

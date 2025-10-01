@@ -142,6 +142,26 @@ def eliminar_servicio():
     conn.close()
     return redirect(url_for("admin_panel"))
 
+@app.route("/actualizar_servicio", methods=["POST"])
+@role_required(["admin"])
+def actualizar_servicio():
+    id_servicio = request.form["id"]
+    nombre = request.form["nombre"]
+    descripcion = request.form["descripcion"]
+    costo = request.form["costo"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE servicios SET nombre=%s, descripcion=%s, costo=%s WHERE id=%s",
+        (nombre, descripcion, costo, id_servicio)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for("admin_panel"))
+
 
 # Logout
 @app.route("/logout")
