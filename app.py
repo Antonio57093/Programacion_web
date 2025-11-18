@@ -3,6 +3,7 @@ import mysql.connector
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import Database 
+import ssl
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta"
@@ -57,6 +58,13 @@ def login():
 @app.route("/registro", methods=["GET", "POST"])
 def registro():
     mensaje = ""
+    datos_formulario = {
+        "usuario": "",
+        "correo": "",
+        "nombre": "",
+        "contrasena": "",
+        "confirmar_contrasena": ""
+    }
     if request.method == "POST":
         usuario = request.form["usuario"]
         correo = request.form["correo"]
@@ -64,9 +72,36 @@ def registro():
         contrasena = request.form["contrasena"]
         confirmar = request.form["confirmar_contrasena"]
 
+        datos_formulario={
+            "usuario": usuario,
+            "correo": correo,
+            "nombre": nombre,
+            "contrasena": contrasena,
+            "confirmar_contrasena": confirmar
+        }
+
         if contrasena != confirmar:
             mensaje = "Las contraseñas no coinciden"
-            return render_template("registro.html", mensaje=mensaje)
+            return render_template("registro.html", mensaje=mensaje,datos=datos_formulario)
+        
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT * FROM clientes WHERE usuario=%s OR correo=%s",
+            (usuario, correo),
+        )
+        usuario_existente = cursor.fetchone()
+
+        if usuario_existente:
+            conn.close()
+            if usuario_existente["usuario"] == usuario:
+                mensaje = "El nombre de usuario ya está en uso."
+            else:
+                mensaje = "El correo electrónico ya está registrado."
+            return render_template("registro.html", mensaje=mensaje,datos=datos_formulario)
+
+
+
         # Hashear la contraseña antes de guardarla
         contrasena_cifrada = generate_password_hash(contrasena)
         conn = get_db_connection()
@@ -79,7 +114,31 @@ def registro():
         conn.close()
         return redirect(url_for("home"))
 
-    return render_template("registro.html", mensaje=mensaje)
+    return render_template("registro.html", mensaje=mensaje,datos=datos_formulario)
+
+@app.route("/verificar_usuario_email")
+def verificar_usuario_email():
+    usuario = request.args.get('usuario', '')
+    correo = request.args.get('correo', '')
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    cursor.execute(
+        "SELECT usuario, correo FROM clientes WHERE usuario=%s OR correo=%s",
+        (usuario, correo)
+    )
+    usuario_existente = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    if usuario_existente:
+        if usuario_existente["usuario"] == usuario:
+            return {"disponible": False, "mensaje": "El nombre de usuario ya está en uso"}
+        elif usuario_existente["correo"] == correo:
+            return {"disponible": False, "mensaje": "El correo electrónico ya está registrado"}
+    
+    return {"disponible": True, "mensaje": "Disponible"}
 
 # Página de inicio después del login
 @app.route("/inicio")
@@ -261,5 +320,12 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
+    print("Servidor HTTPS ejecutándose en: https://localhost:5000")
+    
+    # SIN ADVERTENCIAS - forma moderna
+    app.run(
+        host="0.0.0.0", 
+        port=5000, 
+        debug=True,
+        ssl_context=('ssl/cert.pem', 'ssl/key.pem')
+    )

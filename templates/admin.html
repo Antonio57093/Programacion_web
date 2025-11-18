@@ -34,6 +34,11 @@
 </form>
 </section>
 
+<section style="margin: 20px 0;">
+      <h2>Buscar servicios</h2>
+      <input type="text" id="buscadorServicios" placeholder="Buscar por nombre o descripción..." style="width: 300px; padding: 5px;">
+</section>
+
 <section>
 <h2>Servicios Actuales</h2>
 <table>
@@ -66,6 +71,8 @@
 {% endfor %}
 </table>
 </section>
+
+
 
 <section id="editarServicio" style="display:none; margin-top:20px;">
       <h2>Editar servicio</h2>
@@ -117,6 +124,26 @@ alt="¡CSS Válido!" height="31" width="88" />
       $("#editarServicio").hide();
     });
   });
+
+  $(document).ready(function(){
+      // Buscador de servicios en tiempo real
+      $("#buscadorServicios").on("input", function() {
+        const searchText = $(this).val().toLowerCase().trim();
+        
+        $("table tr").each(function() {
+          if ($(this).find("td").length > 0) {
+            const nombre = $(this).find("td:nth-child(2)").text().toLowerCase();
+            const descripcion = $(this).find("td:nth-child(3)").text().toLowerCase();
+            
+            if (nombre.includes(searchText) || descripcion.includes(searchText)) {
+              $(this).show();
+            } else {
+              $(this).hide();
+            }
+          }
+        });
+      });
+    });
 </script>
 </body>
 </html>

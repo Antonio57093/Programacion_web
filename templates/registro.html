@@ -3,7 +3,8 @@
 <head>
 <link rel="stylesheet" href="/static/login.css"> 
   <meta charset="UTF-8">
-  <title>login</title>
+  <title>Registro</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
   <header>
@@ -13,23 +14,199 @@
     <section id="login">   
       <form action="/registro" method="POST">
         <h2>Registrarse</h2>
+        
         <label for="usuario">Usuario:</label>
-        <input type="text" id="usuario" name="usuario" required><br><br>
+        <input type="text" id="usuario" name="usuario" value="{{ datos.usuario if datos else '' }}" required>
+        <br><br>
+        
         <label for="correo">Correo:</label>
-        <input type="email" id="correo" name="correo" required><br><br>
+        <input type="email" id="correo" name="correo" value="{{ datos.correo if datos else '' }}" required>
+        <br><br>
+
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="nombre" required><br><br>
+        <input type="text" id="nombre" name="nombre" value="{{ datos.nombre if datos else '' }}" required><br><br>
+        
         <label for="contrasena">Contraseña:</label>
         <input type="password" id="contrasena" name="contrasena" required><br><br>
+        
         <label for="confirmar_contrasena">Confirmar Contraseña:</label>
         <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" required><br><br>
+        
+        <div id="estadoValidacion" style="margin: 15px 0; padding: 10px; border-radius: 5px; display: none;">
+          <p id="mensajeValidacion" style="margin: 0; font-weight: bold;"></p>
+        </div>
+        
         {% if mensaje %}
-        <p style="color:red;">{{ mensaje }}</p>
+        <p style="color:red; font-weight: bold; padding: 10px; background-color: #ffe6e6; border: 1px solid red; border-radius: 4px;">{{ mensaje }}</p>
         {% endif %}
 
         <button type="submit">Registrar</button>
+        
+        <p style="margin-top: 15px;">
+          ¿Ya tienes cuenta? <a href="{{ url_for('home') }}">Inicia sesión aquí</a>
+        </p>
       </form>
     </section>
+    
+  <script>  
+    $(document).ready(function() {
+        let usuarioValido = false;
+        let emailValido = false;
+        
+        function actualizarEstilosCampos() {
+            // Estilo para campo de usuario
+            if (usuarioValido) {
+                $("#usuario").css({
+                    "border": "2px solid #28a745",
+                    "background-color": "#f8fff9"
+                });
+            } else if ($("#usuario").val().trim().length >= 3) {
+                $("#usuario").css({
+                    "border": "2px solid #dc3545",
+                    "background-color": "#fff8f8"
+                });
+            } else {
+                $("#usuario").css({
+                    "border": "1px solid #ccc",
+                    "background-color": "white"
+                });
+            }
+            
+            // Estilo para campo de correo
+            if (emailValido) {
+                $("#correo").css({
+                    "border": "2px solid #28a745",
+                    "background-color": "#f8fff9"
+                });
+            } else if ($("#correo").val().trim().length >= 5) {
+                $("#correo").css({
+                    "border": "2px solid #dc3545",
+                    "background-color": "#fff8f8"
+                });
+            } else {
+                $("#correo").css({
+                    "border": "1px solid #ccc",
+                    "background-color": "white"
+                });
+            }
+        }
+        
+        // Función para verificar usuario/email via AJAX
+        function verificarDisponibilidad() {
+            const usuario = $("#usuario").val().trim();
+            const correo = $("#correo").val().trim();
+            
+            if (usuario.length < 3 || correo.length < 5) {
+                $("#estadoValidacion").hide();
+                actualizarEstilosCampos();
+                return;
+            }
+            
+            // Mostrar loading
+            $("#mensajeValidacion").text("Verificando disponibilidad...");
+            $("#estadoValidacion").show().css({
+                "background-color": "#fff3cd",
+                "border": "1px solid #ffeaa7",
+                "color": "#856404"
+            });
+            
+            // Petición AJAX
+            $.get("/verificar_usuario_email", {
+                usuario: usuario,
+                correo: correo
+            }, function(respuesta) {
+                if (respuesta.disponible) {
+                    $("#mensajeValidacion").text("✓ Usuario y correo disponibles");
+                    $("#estadoValidacion").css({
+                        "background-color": "#d4edda",
+                        "border": "1px solid #c3e6cb",
+                        "color": "#155724"
+                    });
+                    usuarioValido = true;
+                    emailValido = true;
+                } else {
+                    $("#mensajeValidacion").text("✗ " + respuesta.mensaje);
+                    $("#estadoValidacion").css({
+                        "background-color": "#f8d7da",
+                        "border": "1px solid #f5c6cb",
+                        "color": "#721c24"
+                    });
+                    
+                    if (respuesta.mensaje.includes("usuario")) {
+                        usuarioValido = false;
+                    } else {
+                        emailValido = false;
+                    }
+                }
+                actualizarEstilosCampos();
+            }).fail(function() {
+                $("#mensajeValidacion").text("Error al verificar disponibilidad");
+                $("#estadoValidacion").css({
+                    "background-color": "#f8d7da",
+                    "border": "1px solid #f5c6cb",
+                    "color": "#721c24"
+                });
+                usuarioValido = false;
+                emailValido = false;
+                actualizarEstilosCampos();
+            });
+        }
+        
+        // Validar cuando el usuario termina de escribir en usuario o correo
+        $("#usuario").on("blur", function() {
+            if ($(this).val().trim().length >= 3) {
+                verificarDisponibilidad();
+            } else {
+                actualizarEstilosCampos();
+            }
+        });
+        
+        $("#correo").on("blur", function() {
+            if ($(this).val().trim().length >= 5) {
+                verificarDisponibilidad();
+            } else {
+                actualizarEstilosCampos();
+            }
+        });
+        
+        // Validar en tiempo real mientras escriben (con delay)
+        let timeout;
+        $("#usuario, #correo").on("input", function() {
+            actualizarEstilosCampos(); // Actualizar estilos inmediatamente
+            
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                verificarDisponibilidad();
+            }, 100); 
+        });
+        
+        // Validar antes de enviar el formulario
+        $("form").on("submit", function(e) {
+            const usuario = $("#usuario").val().trim();
+            const correo = $("#correo").val().trim();
+            
+            if (!usuarioValido || !emailValido) {
+                e.preventDefault();
+                $("#mensajeValidacion").text("Por favor verifica que el usuario y correo estén disponibles");
+                $("#estadoValidacion").show().css({
+                    "background-color": "#f8d7da",
+                    "border": "1px solid #f5c6cb",
+                    "color": "#721c24"
+                });
+                $("#usuario").focus();
+                return false;
+            }
+        });
+        
+        // Validación inicial de campos si ya tienen valor
+        if ($("#usuario").val().trim() || $("#correo").val().trim()) {
+            actualizarEstilosCampos();
+        }
+        
+        // Añadir transición suave para los cambios de estilo
+        $("#usuario, #correo").css("transition", "all 0.3s ease");
+    });
+  </script>  
 
   <footer>
     <p>Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados</p>
@@ -45,5 +222,4 @@
     </a>
   </footer>
 </body>
-
 </html>

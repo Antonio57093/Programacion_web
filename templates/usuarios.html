@@ -1,0 +1,159 @@
+<!-- PROGRAMA: usuarios.html
+DESCRIPCIÓN:
+  Interfaz para que el admin vea, agregue, edite y elimine usuarios.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Administrar Usuarios</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Panel de Administración - Usuarios</h1>
+    <nav>
+      <a href="{{ url_for('admin_panel') }}">Servicios</a> |
+      <a href="{{ url_for('inicio') }}">Inicio</a> |
+      <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>Agregar usuario</h2>
+      <form method="POST" action="{{ url_for('usuarios_agregar') }}">
+        <label>Usuario:</label>
+        <input type="text" name="usuario" required>
+
+        <label>Nombre:</label>
+        <input type="text" name="nombre" required>
+
+        <label>Correo:</label>
+        <input type="email" name="correo" required>
+
+        <label>Contraseña:</label>
+        <input type="password" name="contrasena" required>
+
+        <label>Rol:</label>
+        <select name="rol">
+          <option value="user">user</option>
+          <option value="admin">admin</option>
+        </select>
+        <br><br>
+        <button type="submit">Agregar Usuario</button>
+      </form>
+    </section>
+    
+    <section style="margin: 20px 0;">
+      <h2>Buscar usuarios</h2>
+      <input type="text" id="buscadorUsuarios" placeholder="Buscar por usuario, nombre o correo..." style="width: 300px; padding: 5px;">
+    </section>
+
+    <section>
+      <h2>Usuarios actuales</h2>
+      <table>
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Nombre</th>
+          <th>Correo</th>
+          <th>Rol</th>
+          <th>Acciones</th>
+        </tr>
+        {% for u in usuarios %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.usuario }}</td>
+          <td>{{ u.nombre }}</td>
+          <td>{{ u.correo }}</td>
+          <td>{{ u.rol }}</td>
+          <td>
+            <!-- Botón editar: abre un formulario simple -->
+            <button class="btn-edit" data-id="{{ u.id }}" data-usuario="{{ u.usuario }}" data-nombre="{{ u.nombre }}" data-correo="{{ u.correo }}" data-rol="{{ u.rol }}">Editar</button>
+
+            <form method="POST" action="{{ url_for('usuarios_eliminar') }}" style="display:inline;">
+              <input type="hidden" name="id" value="{{ u.id }}">
+              <button type="submit" onclick="return confirm('¿Eliminar usuario?')">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </section>
+
+    <!-- Modal/Seccion editar (simplemente muestra el form y lo envía) -->
+    <section id="editarUsuario" style="display:none; margin-top:20px;">
+      <h2>Editar usuario</h2>
+      <form method="POST" action="{{ url_for('usuarios_editar') }}">
+        <input type="hidden" name="id" id="e_id">
+        <label>Usuario:</label>
+        <input type="text" name="usuario" id="e_usuario" required>
+
+        <label>Nombre:</label>
+        <input type="text" name="nombre" id="e_nombre" required>
+
+        <label>Correo:</label>
+        <input type="email" name="correo" id="e_correo" required>
+
+        <label>Rol:</label>
+        <select name="rol" id="e_rol">
+          <option value="user">user</option>
+          <option value="admin">admin</option>
+        </select>
+
+        <label>Nueva contraseña (dejar vacío para mantener actual):</label>
+        <input type="password" name="contrasena" id="e_contrasena">
+
+        <br><br>
+        <button type="submit">Guardar cambios</button>
+        <button type="button" id="cancelEdit">Cancelar</button>
+      </form>
+    </section>
+
+  </main>
+  <footer>
+    <p>Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados</p>
+  </footer>
+
+<script>
+  $(document).ready(function(){
+    $(".btn-edit").on("click", function(){
+      $("#e_id").val($(this).data("id"));
+      $("#e_usuario").val($(this).data("usuario"));
+      $("#e_nombre").val($(this).data("nombre"));
+      $("#e_correo").val($(this).data("correo"));
+      $("#e_rol").val($(this).data("rol"));
+      $("#editarUsuario").show();
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+    $("#cancelEdit").on("click", function(){
+      $("#editarUsuario").hide();
+    });
+  });
+
+  $(document).ready(function(){
+      // Buscador de usuarios en tiempo real
+      $("#buscadorUsuarios").on("input", function() {
+        const searchText = $(this).val().toLowerCase().trim();
+        
+        $("table tr").each(function() {
+          if ($(this).find("td").length > 0) {
+            const usuario = $(this).find("td:nth-child(2)").text().toLowerCase();
+            const nombre = $(this).find("td:nth-child(3)").text().toLowerCase();
+            const correo = $(this).find("td:nth-child(4)").text().toLowerCase();
+            
+            if (usuario.includes(searchText) || nombre.includes(searchText) || correo.includes(searchText)) {
+              $(this).show();
+            } else {
+              $(this).hide();
+            }
+          }
+        });
+      });
+    });
+</script>
+</body>
+</html>
