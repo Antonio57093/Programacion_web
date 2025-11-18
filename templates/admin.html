@@ -1,128 +1,122 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Panel de Administración</title>
-  <link rel="stylesheet" href="https://antonio57093.github.io/Programacion_web/static/admin.css">
+<head> 
+<meta charset="UTF-8">
+<title>Panel de Administración</title>
+<link rel="stylesheet" href="https://antonio57093.github.io/Programacion_web/static/admin.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-    
-  <header>
-    <h1>Panel de Administración - Servicios</h1>
-    <nav>
-      <a href="{{ url_for('inicio') }}">Inicio</a> |
-      <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
-    </nav>
+ 
+<header>
+  <h1>Panel de Administración - Servicios</h1>
+  <nav>
+  <a href="{{ url_for('inicio') }}">Inicio</a> |
+  <a href="{{url_for('usuarios_panel')}}"> Gestión de Usuarios</a>|
+  <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+  </nav>
   </header>
 
-  <main>
-    <!-- Agregar servicio -->
-    <section>
-      <h2>Agregar un nuevo servicio</h2>
-      <form method="POST" action="{{ url_for('agregar_servicio') }}">
-        <label for="nombre">Nombre del servicio:</label>
-        <input type="text" id="nombre" name="nombre" required><br><br>
+<main>
+<section>
+<h2>Agregar un nuevo servicio</h2>
+<form method="POST" action="{{ url_for('agregar_servicio') }}">
+<label for="nombre">Nombre del servicio:</label>
+<input type="text" id="nombre" name="nombre" required><br><br>
 
-        <label for="descripcion">Descripción:</label>
-        <textarea id="descripcion" name="descripcion" rows="3" required></textarea><br><br>
+<label for="descripcion">Descripción:</label>
+<textarea id="descripcion" name="descripcion" rows="3" required></textarea><br><br>
 
-        <label for="costo">Costo:</label>
-        <input type="number" id="costo" name="costo" required><br><br>
+<label for="costo">Costo:</label>
+<input type="number" id="costo" name="costo" required><br><br>
 
-        <button type="submit">Agregar Servicio</button>
-      </form>
-    </section>
+<button type="submit">Agregar Servicio</button>
+</form>
+</section>
 
-    <!-- Editar servicio -->
-    <section>
-      <h2>Editar un servicio</h2>
+<section>
+<h2>Servicios Actuales</h2>
+<table>
+<tr>
+<th>ID</th>
+<th>Nombre</th>
+<th>Descripción</th>
+<th>Costo</th>
+<th>Acciones</th>
+</tr>
+{% for servicio in servicios %}
+<tr>
+<td>{{ servicio.id }}</td>
+<td>{{ servicio.nombre }}</td>
+<td>{{ servicio.descripcion }}</td>
+<td>${{ servicio.costo }}</td>
+<td>
+            <button class="btn-edit-servicio"
+                    data-id="{{ servicio.id }}"
+                    data-nombre="{{ servicio.nombre }}"
+                    data-descripcion="{{ servicio.descripcion }}"
+                    data-costo="{{ servicio.costo }}">Editar</button>
+
+<form method="POST" action="{{ url_for('eliminar_servicio') }}" style="display:inline;">
+<input type="hidden" name="id" value="{{ servicio.id }}">
+<button type="submit" onclick="return confirm('¿Seguro que quieres eliminar este servicio?')">Eliminar</button>
+</form>
+</td>
+</tr>
+{% endfor %}
+</table>
+</section>
+
+<section id="editarServicio" style="display:none; margin-top:20px;">
+      <h2>Editar servicio</h2>
       <form method="POST" action="{{ url_for('actualizar_servicio') }}">
-        <label for="id_editar">Selecciona el servicio:</label>
-        <select id="id_editar" name="id" required onchange="cargarDatos(this)">
-          <option value="">-- Selecciona --</option>
-          {% for servicio in servicios %}
-            <option value="{{ servicio.id }}"
-              data-nombre="{{ servicio.nombre }}"
-              data-descripcion="{{ servicio.descripcion }}"
-              data-costo="{{ servicio.costo }}">
-              {{ servicio.nombre }} - ${{ servicio.costo }}
-            </option>
-          {% endfor %}
-        </select><br><br>
+        <input type="hidden" name="id" id="s_id">
 
-        <label for="nombre_editar">Nombre:</label>
-        <input type="text" id="nombre_editar" name="nombre" required><br><br>
+        <label for="s_nombre">Nombre:</label>
+        <input type="text" id="s_nombre" name="nombre" required><br><br>
 
-        <label for="descripcion_editar">Descripción:</label>
-        <textarea id="descripcion_editar" name="descripcion" rows="3" required></textarea><br><br>
+        <label for="s_descripcion">Descripción:</label>
+        <textarea id="s_descripcion" name="descripcion" rows="3" required></textarea><br><br>
 
-        <label for="costo_editar">Costo:</label>
-        <input type="number" id="costo_editar" name="costo" required><br><br>
+        <label for="s_costo">Costo:</label>
+        <input type="number" id="s_costo" name="costo" required><br><br>
 
-        <button type="submit">Actualizar Servicio</button>
+        <button type="submit">Guardar Cambios</button>
+        <button type="button" id="cancelarEditarServicio">Cancelar</button>
       </form>
     </section>
+</main>
 
+<footer>
+<p>Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados</p>
 
-    <section>
-      <h2>Servicios Actuales</h2>
-      <table>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Descripción</th>
-          <th>Costo</th>
-          <th>Acciones</th>
-        </tr>
-        {% for servicio in servicios %}
-        <tr>
-          <td>{{ servicio.id }}</td>
-          <td>{{ servicio.nombre }}</td>
-          <td>{{ servicio.descripcion }}</td>
-          <td>${{ servicio.costo }}</td>
-          <td>
-            <!-- Botón eliminar -->
-            <form method="POST" action="{{ url_for('eliminar_servicio') }}" style="display:inline;">
-              <input type="hidden" name="id" value="{{ servicio.id }}">
-              <button type="submit" onclick="return confirm('¿Seguro que quieres eliminar este servicio?')">Eliminar</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-    </section>
-  </main>
+<a href="https://validator.w3.org/check?uri=referer">
+<img src="https://www.w3.org/Icons/valid-html401"
+alt="¡HTML válido!" height="31" width="88">
+</a>
 
-  <footer>
-    <p>Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados</p>
-  
-    <a href="https://validator.w3.org/check?uri=referer">
-      <img src="https://www.w3.org/Icons/valid-html401"
-           alt="¡HTML válido!" height="31" width="88">
-    </a>
+<a href="https://jigsaw.w3.org/css-validator/validator?lang=es&profile=css3svg&uri=https%3A%2F%2Fantonio57093.github.io%2FProgramacion_web%2Fstatic%2Fadmin.css&usermedium=all&vextwarning=&warning=1">
+<img src="https://jigsaw.w3.org/css-validator/images/vcss-blue"
+alt="¡CSS Válido!" height="31" width="88" />
+</a>
+</footer>
 
-    <a href="https://jigsaw.w3.org/css-validator/check/referer">
-      <img src="https://jigsaw.w3.org/css-validator/images/vcss-blue"
-            alt="¡CSS Válido!" height="31" width="88" />
-    </a>
-  </footer>
+<script>
+  $(document).ready(function(){
+    $(".btn-edit-servicio").on("click", function(){
+      $("#s_id").val($(this).data("id"));
+      $("#s_nombre").val($(this).data("nombre"));
+      $("#s_descripcion").val($(this).data("descripcion"));
+      $("#s_costo").val($(this).data("costo"));
 
-  <!-- Script para cargar datos en el formulario de edicion -->
-  <script>
-    function cargarDatos(select) {
-      let option = select.options[select.selectedIndex];
-      if(option.value) {
-        document.getElementById("nombre_editar").value = option.getAttribute("data-nombre");
-        document.getElementById("descripcion_editar").value = option.getAttribute("data-descripcion");
-        document.getElementById("costo_editar").value = option.getAttribute("data-costo");
-      } else {
-        document.getElementById("nombre_editar").value = "";
-        document.getElementById("descripcion_editar").value = "";
-        document.getElementById("costo_editar").value = "";
-      }
-    }
-  </script>
+      $("#editarServicio").show();
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    $("#cancelarEditarServicio").on("click", function(){
+      $("#editarServicio").hide();
+    });
+  });
+</script>
 </body>
 </html>
-
-

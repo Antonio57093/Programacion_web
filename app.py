@@ -1,18 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import mysql.connector
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
+from db import Database 
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta"
-
 # Conexión BD
+db = Database()
 def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="C8be1987d0d4", 
-        database="lexcorp"
-    )
+    return db.connect()
 
 # Decorador para proteger rutas según rol
 def role_required(roles):
@@ -34,24 +31,27 @@ def home():
 
 @app.route("/login", methods=["POST"])
 def login():
-    usuario = request.form["usuario"]
-    contrasena = request.form["contrasena"]
+    usuario = request.form["usuario"].strip()
+    contrasena = request.form["contrasena"].strip()
+
+    if not usuario or not contrasena:
+        return render_template("login.html", error="Por favor llena todos los campos antes de continuar.")
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT * FROM clientes WHERE usuario=%s AND contrasena=%s",
-        (usuario, contrasena),
+        "SELECT * FROM clientes WHERE usuario=%s",
+        (usuario,),
     )
     user = cursor.fetchone()
     conn.close()
-
-    if user:
+    
+    if user and check_password_hash(user['contrasena'], contrasena):  # ✅ Verificar hash
         session["usuario"] = user["usuario"]
-        session["rol"] = user.get("rol", "user")  # si no hay rol, se asume cliente
+        session["rol"] = user.get("rol", "user")
         return redirect(url_for("inicio"))
     else:
-        return "Usuario o contraseña incorrectos"
+        return render_template("login.html", error="Usuario o contraseña incorrectos")
 
 # Página de registro
 @app.route("/registro", methods=["GET", "POST"])
@@ -67,12 +67,13 @@ def registro():
         if contrasena != confirmar:
             mensaje = "Las contraseñas no coinciden"
             return render_template("registro.html", mensaje=mensaje)
-
+        # Hashear la contraseña antes de guardarla
+        contrasena_cifrada = generate_password_hash(contrasena)
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO clientes (usuario, nombre, correo, contrasena, rol) VALUES (%s,%s,%s,%s,%s)",
-            (usuario, nombre, correo, contrasena, "user"),  # por defecto cliente
+            (usuario, nombre, correo, contrasena_cifrada, "user"), 
         )
         conn.commit()
         conn.close()
@@ -80,7 +81,7 @@ def registro():
 
     return render_template("registro.html", mensaje=mensaje)
 
-# Página de inicio después de login
+# Página de inicio después del login
 @app.route("/inicio")
 def inicio():
     if "usuario" in session:
@@ -100,6 +101,94 @@ def inicio():
 
 
 
+
+# Gestión de usuarios
+@app.route("/usuarios")
+@role_required(["admin"])
+def usuarios_panel():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id, usuario, nombre, correo, rol FROM clientes")
+    usuarios = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template("usuarios.html", usuarios=usuarios)
+
+
+# Agregar usuario
+@app.route("/usuarios/agregar", methods=["POST"])
+@role_required(["admin"])
+def usuarios_agregar():
+    usuario = request.form["usuario"]
+    nombre = request.form["nombre"]
+    correo = request.form["correo"]
+    contrasena = request.form["contrasena"]
+    rol = request.form["rol"]
+    contrasena_cifrada = generate_password_hash(contrasena)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO clientes (usuario, nombre, correo, contrasena, rol) VALUES (%s, %s, %s, %s, %s)",
+        (usuario, nombre, correo, contrasena_cifrada, rol)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for("usuarios_panel"))
+
+
+#Editar usuario
+@app.route("/usuarios/editar", methods=["POST"])
+@role_required(["admin"])
+def usuarios_editar():
+    id_usuario = request.form["id"]
+    usuario = request.form["usuario"]
+    nombre = request.form["nombre"]
+    correo = request.form["correo"]
+    rol = request.form["rol"]
+    contrasena = request.form["contrasena"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Si no se cambia la contraseña, solo actualiza los demás campos
+    if contrasena.strip():
+        contrasena_cifrada = generate_password_hash(contrasena)
+        cursor.execute(
+            "UPDATE clientes SET usuario=%s, nombre=%s, correo=%s, rol=%s, contrasena=%s WHERE id=%s",
+            (usuario, nombre, correo, rol, contrasena_cifrada, id_usuario)
+        )
+    else:
+        cursor.execute(
+            "UPDATE clientes SET usuario=%s, nombre=%s, correo=%s, rol=%s WHERE id=%s",
+            (usuario, nombre, correo, rol, id_usuario)
+        )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for("usuarios_panel"))
+
+
+#Eliminar usuario
+@app.route("/usuarios/eliminar", methods=["POST"])
+@role_required(["admin"])
+def usuarios_eliminar():
+    id_usuario = request.form["id"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM clientes WHERE id = %s", (id_usuario,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for("usuarios_panel"))
+
+# Panel de administración
 @app.route("/admin")
 @role_required(["admin"])
 def admin_panel():
@@ -110,6 +199,7 @@ def admin_panel():
     cursor.close()
     conn.close()
     return render_template("admin.html", servicios=servicios)
+
 
 @app.route("/agregar_servicio", methods=["POST"])
 @role_required(["admin"])
@@ -162,8 +252,8 @@ def actualizar_servicio():
 
     return redirect(url_for("admin_panel"))
 
-
-# Logout
+#
+# Cerrar sesion
 @app.route("/logout")
 def logout():
     session.clear()

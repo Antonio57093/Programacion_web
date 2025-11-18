@@ -98,7 +98,7 @@ form button {
 
 form button:hover {
   background: #C9A227;
-  color: #1B263B;
+  color: hsl(219, 37%, 17%);
 }
 
 footer {
@@ -109,3 +109,17 @@ footer {
   border-top: 5px solid #C9A227;
 }
 
+.servicio-item {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.servicio-item:hover {
+  background-color: #C9A227;
+}
+
+.servicio-item.show {
+  opacity: 1;
+  transform: translateY(0);
+}

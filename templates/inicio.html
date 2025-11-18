@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bufete de Abogados - Justicia y Confianza</title>
+  
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 
 <body>
@@ -15,83 +17,102 @@
       <a href="#mision">Misión</a> |
       <a href="#vision">Visión</a> |
       <a href="#servicios">Servicios</a> |
-      <a href="#contacto">Contacto</a>
+      <a href="#contacto">Contacto</a> |
 
       {% if rol == "admin" %}
-        | <a href="{{ url_for('admin_panel') }}">Panel de Admin</a>
+      <a href="{{ url_for('admin_panel') }}">Panel de Admin</a> |
       {% endif %}
-      | <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+       <a href="{{ url_for('logout') }}">Cerrar sesión</a>
     </nav>
   </header>
 
-  <section id="inicio"> 
-    <h2>Bienvenidos</h2>
-    <p>
-      Somos un bufete de abogados comprometido con la justicia y la defensa de los derechos
-      de nuestros clientes. Más de 20 años de experiencia nos respaldan.
-    </p>
+<section id="inicio"> 
+  <h2>Bienvenidos</h2>
+  <p>
+    Somos un bufete de abogados comprometido con la justicia y la defensa de los derechos
+    de nuestros clientes. Más de 20 años de experiencia nos respaldan.
+  </p>
 
-    <img src="https://antonio57093.github.io/Programacion_web/static/abogados.png" alt="Equipo de abogados" width="400">
-  </section>
+  <img src="https://antonio57093.github.io/Programacion_web/static/abogados.png" alt="Equipo de abogados" width="400">
+</section>
 
-  <section id="mision">
-    <h2>Nuestra Misión</h2>
-    <p>
-      Brindar asesoría legal de calidad, defendiendo los intereses de nuestros clientes
-      con profesionalismo, ética y compromiso.
-    </p>
-  </section>
+<section id="mision">
+  <h2>Nuestra Misión</h2>
+  <p>
+    Brindar asesoría legal de calidad, defendiendo los intereses de nuestros clientes
+    con profesionalismo, ética y compromiso.
+  </p>
+</section>
 
-  <section id="vision">
-    <h2>Nuestra Visión</h2>
-    <p>
-      Ser el bufete líder en la región, reconocido por nuestra excelencia profesional
-      y por lograr soluciones legales justas y efectivas.
-    </p>
-  </section>
+<section id="vision">
+  <h2>Nuestra Visión</h2>
+  <p>
+    Ser el bufete líder en la región, reconocido por nuestra excelencia profesional
+    y por lograr soluciones legales justas y efectivas.
+  </p>
+</section>
 
-  <section id="servicios">
-    <h2>Servicios Legales</h2>
-    <ul>
+<section id="servicios">
+  <h2>Servicios Legales</h2>
+  <ul>
     {% if servicios %}
-        {% for servicio in servicios %}
-            <li>{{ servicio.nombre }} - ${{ servicio.costo }}</li>
-        {% endfor %}
+      {% for servicio in servicios %}
+        <li class="servicio-item">{{ servicio.nombre }} - ${{ servicio.costo }}</li>
+      {% endfor %}
     {% else %}
-        <p>No se pudo acceder a la base de datos</p>
+      <p>No se pudo acceder a la base de datos</p>
     {% endif %}
-    </ul>
-  </section>
+  </ul>
+</section>
 
-  <section id="contacto">
-    <h2>Contáctanos</h2>
-    <form>
-      <label for="nombre">Nombre:</label><br>
-      <input type="text" id="nombre" name="nombre" required><br><br>
+<section id="contacto">
+  <h2>Contáctanos</h2>
+  <form>
+    <label for="nombre">Nombre:</label><br>
+    <input type="text" id="nombre" name="nombre" required><br><br>
 
-      <label for="correo">Correo:</label><br>
-      <input type="email" id="correo" name="correo" required><br><br>
+    <label for="correo">Correo:</label><br>
+    <input type="email" id="correo" name="correo" required><br><br>
 
-      <label for="mensaje">Mensaje:</label><br>
-      <textarea id="mensaje" name="mensaje" rows="5"></textarea><br><br>
+    <label for="mensaje">Mensaje:</label><br>
+    <textarea id="mensaje" name="mensaje" rows="5"></textarea><br><br>
 
-      <button type="submit">Enviar</button>
-    </form>
-  </section>
+    <button type="submit">Enviar</button>
+  </form>
+</section>
 
-  <footer>
-    <p>Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados</p>
+<footer>
+  <p>Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados</p>
   
-    <a href="https://validator.w3.org/check?uri=referer">
-      <img src="https://www.w3.org/Icons/valid-html401"
-           alt="¡HTML válido!" height="31" width="88">
-    </a>
+  <a href="https://validator.w3.org/check?uri=referer">
+  <img src="https://www.w3.org/Icons/valid-html401"alt="¡HTML válido!" height="31" width="88">
+  </a>
+    
+  <a href="https://jigsaw.w3.org/css-validator/validator?lang=es&profile=css3svg&uri=https%3A%2F%2Fantonio57093.github.io%2FProgramacion_web%2Fstatic%2Findex.css&usermedium=all&vextwarning=&warning=1">
+  <img src="https://jigsaw.w3.org/css-validator/images/vcss-blue"alt="¡CSS Válido!" height="31" width="88" />
+  </a>
+</footer>
 
-    <a href="https://jigsaw.w3.org/css-validator/check/referer">
-      <img src="https://jigsaw.w3.org/css-validator/images/vcss-blue"
-            alt="¡CSS Válido!" height="31" width="88" />
-    </a>
-  </footer>
+<script>
+  $(document).ready(function() {
+  function revealServicios() {
+    $(".servicio-item").each(function(i) {
+      const bottom_of_element = $(this).offset().top + $(this).outerHeight();
+      const bottom_of_window = $(window).scrollTop() + $(window).height();
+
+      if (bottom_of_window > bottom_of_element - 50) {
+        $(this).delay(150 * i).queue(function(next) {
+          $(this).addClass("show");
+          next();
+        });
+      }
+    });
+  }
+  revealServicios();
+  $(window).on("scroll", revealServicios);
+});
+</script>
+
 </body>
 </html>
 

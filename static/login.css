@@ -96,3 +96,17 @@ footer {
   font-size: 0.9em;
 }
 
+.mensaje-error {
+  display: none;
+  background-color: #ffdddd;
+  border: 1px solid #ff4d4d;
+  color: #a10000;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.2);
+}
+
+

@@ -1,49 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
-  
 <head>
-<link rel="stylesheet" href="https://antonio57093.github.io/Programacion_web/static/login.css"> 
   <meta charset="UTF-8">
-  <title>login</title>
+  <title>Login - Justicia y Confianza</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 
 <body>
   <header>
-    <h1>Justicia y confianza</h1>
+    <h1>Justicia y Confianza</h1>
   </header>
 
-    <section id="login">
-      <form action="/login" method="POST">
-        <h2>Iniciar Sesión</h2>
-        
-        <label for="usuario">Usuario:</label>
-        <input type="text" id="usuario" name="usuario" required><br><br>
-        
-        <label for="contrasena">Contraseña:</label>
-        <input type="password" id="contrasena" name="contrasena" required><br><br>
-        
-        <p>¿No tienes una cuenta? 
-        <a href="{{ url_for('registro') }}">Regístrate</a>
-        </p>
-        <button type="submit">Ingresar</button>
-      </form>
+  <section id="login" class="fade-in">
+    <form id="formLogin" action="/login" method="POST">
+      <h2>Iniciar Sesión</h2>
+      <label for="usuario">Usuario:</label>
+      <input type="text" id="usuario" name="usuario" placeholder="Tu nombre de usuario">
 
-    </section>
+      <label for="contrasena">Contraseña:</label>
+      <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña">
+
+      {% if error %}
+        <div class="mensaje-error" id="mensajeError" style="display:block;">
+         {{ error }}
+        </div>
+      {% else %}
+        <div class="mensaje-error" id="mensajeError" style="display:none;">
+          Por favor completa todos los campos correctamente
+        </div>
+      {% endif %}
+
+
+      <p>¿No tienes una cuenta?
+        <a href="{{ url_for('registro') }}">Regístrate</a>
+      </p>
+
+      <button type="submit" id="btnIngresar">Ingresar</button>
+    </form>
+  </section>
 
   <footer>
-    <p>Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados</p>
-  
-    <a href="https://validator.w3.org/check?uri=referer">
-      <img src="https://www.w3.org/Icons/valid-html401"
-           alt="¡HTML válido!" height="31" width="88">
-    </a>
-
-    <a href="https://jigsaw.w3.org/css-validator/check/referer">
-      <img src="https://jigsaw.w3.org/css-validator/images/vcss-blue"
-            alt="¡CSS Válido!" height="31" width="88" />
-    </a>
+    Bufete de Abogados "Justicia y Confianza" 2025 | Todos los derechos reservados
   </footer>
 
+  <script>
+    $(document).ready(function() {
+      $("#login").hide().fadeIn(800);
+      $("#usuario").focus();
+
+      $("#formLogin").on("submit", function(e) {
+        const usuario = $("#usuario").val().trim();
+        const contrasena = $("#contrasena").val().trim();
+
+        $("#btnIngresar")
+          .addClass("loading-btn")
+          .text("Ingresando...")
+          .prop("disabled", true);
+      });
+
+      $("input").on("focus", function() {
+        $(this).addClass("input-focus");
+      }).on("blur", function() {
+        $(this).removeClass("input-focus");
+      });
+
+      if ($("#mensajeError").is(":visible")) {
+        $("#mensajeError")
+          .hide()
+          .fadeIn(500)
+          .delay(2500)
+          .fadeOut(600);
+      }
+    });
+  </script>
+</body>
 </html>
 
 
