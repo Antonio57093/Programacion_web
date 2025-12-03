@@ -321,7 +321,6 @@ def logout():
 
 
 if __name__ == "__main__":
-    import os  # AÑADE ESTA LÍNEA
     port = int(os.environ.get("PORT", 5000))  # CAMBIA ESTA LÍNEA
     app.run(
         host="0.0.0.0", 
