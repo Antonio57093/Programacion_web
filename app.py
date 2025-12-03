@@ -4,6 +4,7 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import Database 
 import ssl
+import os
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta"
@@ -320,11 +321,10 @@ def logout():
 
 
 if __name__ == "__main__":
-    print("Servidor HTTPS ejecutándose en: https://localhost:5000")
-
+    import os  # AÑADE ESTA LÍNEA
+    port = int(os.environ.get("PORT", 5000))  # CAMBIA ESTA LÍNEA
     app.run(
         host="0.0.0.0", 
-        port=5000, 
-        debug=True,
-        ssl_context=('ssl/cert.pem', 'ssl/key.pem')
+        port=port,  # USA port EN LUGAR DE 5000
+        debug=False  # CAMBIA A False PARA PRODUCCIÓN
     )

@@ -1,22 +1,30 @@
-# PROGRAMA: db.py
-# DESCRIPCIÓN:
-#   Clase para manejar la conexión a la base de datos MySQL.
-#   Centraliza la configuración de la BD para usar desde app.py.
-#   Tecnologías: mysql-connector-python
-
+# db.py - VERSIÓN QUE FUNCIONA EN AMBOS
 import mysql.connector
+import os
 
 class Database:
     def __init__(self):
-        self.config = {
-            "host": "localhost",
-            "user": "root",
-            "password": "C&be1987d0d4",
-            "database": "lexcorp",
-            "raise_on_warnings": True
-        }
+        # Si estamos en Render (tiene DATABASE_URL)
+        if 'RENDER' in os.environ or 'DATABASE_URL' in os.environ:
+            # Configuración para Aiven en Render
+            self.config = {
+                "host": "lexcorp-proyectopw.e.aivencloud.com",
+                "user": "avnadmin",
+                "password": "AVNS_r_bBIay2rdVTvXqZlMl",
+                "database": "defaultdb",
+                "port": 20105,
+                "raise_on_warnings": True
+            }
+        else:
+            # Configuración LOCAL (como antes)
+            self.config = {
+                "host": "localhost",
+                "user": "root",
+                "password": "C8be1987d0d4",
+                "database": "lexcorp",
+                "raise_on_warnings": True
+            }
 
     def connect(self):
         return mysql.connector.connect(**self.config)
-
 
