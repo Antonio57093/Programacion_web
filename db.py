@@ -2,7 +2,6 @@ import mysql.connector
 import os
 from dotenv import load_dotenv  # AÑADE ESTA IMPORTACIÓN
 
-# Cargar variables del archivo .env automáticamente
 load_dotenv()
 
 class Database:
@@ -12,7 +11,7 @@ class Database:
             self.config = {
                 "host": "lexcorp-proyectopw.e.aivencloud.com",
                 "user": "avnadmin",
-                "password": os.environ.get('DB_PASSWORD'),  # De Render/Aiven
+                "password": os.environ.get('DB_PASSWORD'),
                 "database": "lexcorp",
                 "port": 20105,
                 "raise_on_warnings": True
