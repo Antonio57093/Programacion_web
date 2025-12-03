@@ -10,13 +10,12 @@ class Database:
             self.config = {
                 "host": "lexcorp-proyectopw.e.aivencloud.com",
                 "user": "avnadmin",
-                "password": "AVNS_r_bBIay2rdVTvXqZlMl",
-                "database": "defaultdb",
+                "password": os.environ.get('DB_PASSWORD'),
+                "database": "lexcorp",
                 "port": 20105,
                 "raise_on_warnings": True
             }
         else:
-            # Configuración LOCAL (como antes)
             self.config = {
                 "host": "localhost",
                 "user": "root",
