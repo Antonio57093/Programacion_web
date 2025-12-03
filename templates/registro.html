@@ -54,7 +54,6 @@
         let emailValido = false;
         
         function actualizarEstilosCampos() {
-            // Estilo para campo de usuario
             if (usuarioValido) {
                 $("#usuario").css({
                     "border": "2px solid #28a745",
@@ -72,7 +71,6 @@
                 });
             }
             
-            // Estilo para campo de correo
             if (emailValido) {
                 $("#correo").css({
                     "border": "2px solid #28a745",
@@ -91,7 +89,7 @@
             }
         }
         
-        // Función para verificar usuario/email via AJAX
+        //Verificamos que el usuario y correo esten disponibles
         function verificarDisponibilidad() {
             const usuario = $("#usuario").val().trim();
             const correo = $("#correo").val().trim();
@@ -169,10 +167,10 @@
             }
         });
         
-        // Validar en tiempo real mientras escriben (con delay)
+        // Validar en tiempo real
         let timeout;
         $("#usuario, #correo").on("input", function() {
-            actualizarEstilosCampos(); // Actualizar estilos inmediatamente
+            actualizarEstilosCampos(); 
             
             clearTimeout(timeout);
             timeout = setTimeout(function() {
@@ -202,8 +200,6 @@
         if ($("#usuario").val().trim() || $("#correo").val().trim()) {
             actualizarEstilosCampos();
         }
-        
-        // Añadir transición suave para los cambios de estilo
         $("#usuario, #correo").css("transition", "all 0.3s ease");
     });
   </script>  

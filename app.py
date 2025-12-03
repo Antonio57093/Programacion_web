@@ -321,8 +321,7 @@ def logout():
 
 if __name__ == "__main__":
     print("Servidor HTTPS ejecutándose en: https://localhost:5000")
-    
-    # SIN ADVERTENCIAS - forma moderna
+
     app.run(
         host="0.0.0.0", 
         port=5000, 
